@@ -1,0 +1,14 @@
+{
+  "apikey": {
+	"label": "MapQuest API Key",
+	"type": "String",
+	"required": true,
+	"help": "Enter the API Key provided by MapQuest."
+  },
+  "isreverse": {
+	"label": "Reverse Geocoding",
+	"type": "Boolean",
+	"required": true,
+	"help": "Check if the plugin will perform reverse geocoding (data.lat, data.lon. Default will be address geocoding."
+  }
+}
