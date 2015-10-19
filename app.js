@@ -1,50 +1,100 @@
 'use strict';
 
-var platform   = require('./platform'),
-	request     = require('request'),
-	isreverse, apikey;
+const MAPQUEST_GEOCODE_URL         = 'https://www.mapquestapi.com/geocoding/v1/address',
+	  MAPQUEST_REVERSE_GEOCODE_URL = 'https://www.mapquestapi.com/geocoding/v1/reverse';
 
+var _        = require('lodash'),
+	config   = require('./config.json'),
+	request  = require('request'),
+	platform = require('./platform'),
+	apikey, geocodingType;
+
+var _handleException = function (error) {
+	console.error(error);
+	platform.handleException(error);
+	platform.sendResult(null);
+};
 
 /*
  * Listen for the data event.
  */
 platform.on('data', function (data) {
+	if (geocodingType === 'Forward') {
+		if (!_.isString(data.address)) return _handleException(new Error('Invalid address.'));
 
-	var url = 'http://www.mapquestapi.com/geocoding/v1/address?';
+		request.get({
+			url: MAPQUEST_GEOCODE_URL,
+			qs: {
+				key: apikey,
+				location: data.address
+			}
+		}, function (reqError, response, body) {
+			if (reqError)
+				_handleException(reqError);
+			else if (response.statusCode !== 200) {
+				var statErr = new Error(response.statusMessage);
 
-	if (isreverse) {
-		url = url + 'key=' + apikey + '&callback=renderReverse&location=' + data.lat + ',' + data.lon;
-	} else {
-		url = url + 'key=' + apikey + '&location=' + data;
+				_handleException(statErr);
+			}
+			else {
+				try {
+					data = JSON.parse(body);
+
+					platform.sendResult(JSON.stringify(_.get(data, 'results[0].locations[0].latLng')));
+				}
+				catch (parseError) {
+					_handleException(parseError);
+				}
+			}
+		});
 	}
+	else {
+		if ((!_.isNaN(data.lat) && !_.isNumber(data.lat) && _.inRange(data.lat, -90, 90) && !_.isNaN(data.lng) && _.isNumber(data.lng) && _.inRange(data.lng, -180, 180))) {
 
-	request(url, function (err, response, body) {
-
-		if (err) {
-			console.error(err);
-			platform.handleException(err);
-		} else if (response.statusCode !== 200) {
-
-			var statErr = new Error(response.statusMessage);
-
-			console.error(statErr);
-			platform.handleException(statErr);
-		} else {
-			platform.sendResult(body);
+			_handleException(new Error('Latitude (lat) and Longitude (lng) are not valid. lat: ' + data.lat + ' lng:' + data.lng));
 		}
-	});
+		else {
+			request.get({
+				url: MAPQUEST_REVERSE_GEOCODE_URL,
+				qs: {
+					key: apikey,
+					location: data.lat + ',' + data.lng
+				}
+			}, function (reqError, response, body) {
+				if (reqError)
+					_handleException(reqError);
+				else if (response.statusCode !== 200) {
+					var statErr = new Error(response.statusMessage);
 
+					_handleException(statErr);
+				}
+				else {
+					try {
+						var address = _.get(JSON.parse(body), 'results[0].locations[0]');
+
+						delete address.latLng;
+						delete address.displayLatLng;
+
+						platform.sendResult(JSON.stringify({
+							address: address
+						}));
+					}
+					catch (parseError) {
+						_handleException(parseError);
+					}
+				}
+			});
+		}
+	}
 });
 
 /*
  * Listen for the ready event.
  */
 platform.once('ready', function (options) {
+	apikey = options.apikey;
+	geocodingType = options.geocoding_type || config.geocoding_type.default;
 
-	apikey	  = options.apikey;
-	isreverse = options.isreverse;
-
-	platform.log('MapQuest Geocode Service Initialized.');
+	platform.log('MapQuest Geocoding Service Initialized.');
 	platform.notifyReady();
-
 });

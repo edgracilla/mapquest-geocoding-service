@@ -5,10 +5,15 @@
 	"required": true,
 	"help": "Enter the API Key provided by MapQuest."
   },
-  "isreverse": {
-	"label": "Reverse Geocoding",
-	"type": "Boolean",
-	"required": true,
-	"help": "Check if the plugin will perform reverse geocoding (data.lat, data.lon. Default will be address geocoding."
+  "geocoding_type": {
+	"label": "Geocoding Type",
+	"type": "String",
+	"enum": [
+	  "Forward",
+	  "Reverse"
+	],
+	"required": false,
+	"default": "Reverse",
+	"help": "(Optional) The type of geocoding to be done. Default 'Reverse'."
   }
 }
