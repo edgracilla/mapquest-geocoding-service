@@ -31,11 +31,8 @@ platform.on('data', function (data) {
 		}, function (reqError, response, body) {
 			if (reqError)
 				_handleException(reqError);
-			else if (response.statusCode !== 200) {
-				var statErr = new Error(response.statusMessage);
-
-				_handleException(statErr);
-			}
+			else if (response.statusCode !== 200)
+				_handleException(new Error(response.statusMessage));
 			else {
 				try {
 					data = JSON.parse(body);
@@ -49,7 +46,8 @@ platform.on('data', function (data) {
 		});
 	}
 	else {
-		if ((!_.isNaN(data.lat) && !_.isNumber(data.lat) && _.inRange(data.lat, -90, 90) && !_.isNaN(data.lng) && _.isNumber(data.lng) && _.inRange(data.lng, -180, 180))) {
+		if (_.isNaN(data.lat) || !_.isNumber(data.lat) || !_.inRange(data.lat, -90, 90) ||
+			_.isNaN(data.lng) || !_.isNumber(data.lng) || !_.inRange(data.lng, -180, 180)) {
 
 			_handleException(new Error('Latitude (lat) and Longitude (lng) are not valid. lat: ' + data.lat + ' lng:' + data.lng));
 		}
@@ -63,11 +61,8 @@ platform.on('data', function (data) {
 			}, function (reqError, response, body) {
 				if (reqError)
 					_handleException(reqError);
-				else if (response.statusCode !== 200) {
-					var statErr = new Error(response.statusMessage);
-
-					_handleException(statErr);
-				}
+				else if (response.statusCode !== 200)
+					_handleException(new Error(response.statusMessage));
 				else {
 					try {
 						var address = _.get(JSON.parse(body), 'results[0].locations[0]');
