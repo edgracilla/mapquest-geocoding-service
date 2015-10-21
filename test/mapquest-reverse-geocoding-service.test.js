@@ -2,8 +2,7 @@
 
 const API_KEY = 'R29vpSI7eqPNB5lnclL6Wk51Q7oq7xYl';
 
-var _      = require('lodash'),
-	cp     = require('child_process'),
+var cp     = require('child_process'),
 	should = require('should'),
 	service;
 
@@ -11,7 +10,13 @@ describe('MapQuest Reverse Geocoding Service', function () {
 	this.slow(8000);
 
 	after('terminate child process', function () {
-		service.kill('SIGKILL');
+		service.send({
+			type: 'close'
+		});
+
+		setTimeout(function () {
+			service.kill('SIGKILL');
+		}, 3000);
 	});
 
 	describe('#spawn', function () {
@@ -45,6 +50,8 @@ describe('MapQuest Reverse Geocoding Service', function () {
 
 	describe('#data', function () {
 		it('should process the latitude and longitude coordinates and send back a valid address', function (done) {
+			this.timeout(4000);
+
 			service.on('message', function (message) {
 				if (message.type === 'result') {
 					var data = JSON.parse(message.data);
