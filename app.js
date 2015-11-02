@@ -38,6 +38,14 @@ platform.on('data', function (data) {
 					data = JSON.parse(body);
 
 					platform.sendResult(JSON.stringify(_.get(data, 'results[0].locations[0].latLng')));
+
+					platform.log(JSON.stringify({
+						title: 'Mapquest Geocoding Service Result',
+						input: {
+							address: data.address
+						},
+						result: data
+					}));
 				}
 				catch (parseError) {
 					_handleException(parseError);
@@ -72,6 +80,15 @@ platform.on('data', function (data) {
 
 						platform.sendResult(JSON.stringify({
 							address: address
+						}));
+
+						platform.log(JSON.stringify({
+							title: 'Mapquest Geocoding Service Result',
+							input: {
+								lat: data.lat,
+								lng: data.lng
+							},
+							result: address
 						}));
 					}
 					catch (parseError) {
