@@ -30,13 +30,6 @@ var isError = function (val) {
 function Platform() {
 	if (!(this instanceof Platform)) return new Platform();
 
-	var self = this;
-
-	process.on('uncaughtException', function (error) {
-		self.handleException(error);
-		process.exit(1);
-	});
-
 	EventEmitter.call(this);
 	Platform.init.call(this);
 }
@@ -48,6 +41,26 @@ inherits(Platform, EventEmitter);
  */
 Platform.init = function () {
 	var self = this;
+
+	process.on('SIGTERM', function () {
+		self.emit('close');
+
+		setTimeout(function () {
+			self.removeAllListeners();
+			process.exit();
+		}, 2000);
+	});
+
+	process.on('uncaughtException', function (error) {
+		console.error('Uncaught Exception', error);
+		self.handleException(error);
+		self.emit('close');
+
+		setTimeout(function () {
+			self.removeAllListeners();
+			process.exit(1);
+		}, 2000);
+	});
 
 	process.on('message', function (m) {
 		if (m.type === 'ready')
