@@ -56,7 +56,6 @@ describe('MapQuest Reverse Geocoding Service', function () {
 				if (message.type === 'result') {
 					var data = JSON.parse(message.data);
 
-					console.log(data);
 					should.ok(data.address, 'Resulting address invalid.');
 					done();
 				}
