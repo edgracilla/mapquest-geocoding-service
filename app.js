@@ -3,9 +3,13 @@
 const MAPQUEST_GEOCODE_URL         = 'https://www.mapquestapi.com/geocoding/v1/address',
 	  MAPQUEST_REVERSE_GEOCODE_URL = 'https://www.mapquestapi.com/geocoding/v1/reverse';
 
-var _        = require('lodash'),
+var _get     = require('lodash.get'),
+	_isNaN   = require('lodash.isnan'),
 	config   = require('./config.json'),
 	request  = require('request'),
+	inRange  = require('lodash.inrange'),
+	isNumber = require('lodash.isnumber'),
+	isString = require('lodash.isstring'),
 	platform = require('./platform'),
 	apikey, geocodingType;
 
@@ -20,7 +24,7 @@ var _handleException = function (error) {
  */
 platform.on('data', function (data) {
 	if (geocodingType === 'Forward') {
-		if (!_.isString(data.address)) return _handleException(new Error('Invalid address.'));
+		if (!isString(data.address)) return _handleException(new Error('Invalid address.'));
 
 		request.get({
 			url: MAPQUEST_GEOCODE_URL,
@@ -37,7 +41,7 @@ platform.on('data', function (data) {
 				try {
 					data = JSON.parse(body);
 
-					platform.sendResult(JSON.stringify(_.get(data, 'results[0].locations[0].latLng')));
+					platform.sendResult(JSON.stringify(_get(data, 'results[0].locations[0].latLng')));
 
 					platform.log(JSON.stringify({
 						title: 'Mapquest Geocoding Service Result',
@@ -54,8 +58,8 @@ platform.on('data', function (data) {
 		});
 	}
 	else {
-		if (_.isNaN(data.lat) || !_.isNumber(data.lat) || !_.inRange(data.lat, -90, 90) ||
-			_.isNaN(data.lng) || !_.isNumber(data.lng) || !_.inRange(data.lng, -180, 180)) {
+		if (_isNaN(data.lat) || !isNumber(data.lat) || !inRange(data.lat, -90, 90) ||
+			_isNaN(data.lng) || !isNumber(data.lng) || !inRange(data.lng, -180, 180)) {
 
 			_handleException(new Error('Latitude (lat) and Longitude (lng) are not valid. lat: ' + data.lat + ' lng:' + data.lng));
 		}
@@ -73,7 +77,7 @@ platform.on('data', function (data) {
 					_handleException(new Error(response.statusMessage));
 				else {
 					try {
-						var address = _.get(JSON.parse(body), 'results[0].locations[0]');
+						var address = _get(JSON.parse(body), 'results[0].locations[0]');
 
 						delete address.latLng;
 						delete address.displayLatLng;
