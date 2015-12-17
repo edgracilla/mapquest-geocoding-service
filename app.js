@@ -15,9 +15,8 @@ var _get     = require('lodash.get'),
 	apikey, geocodingType;
 
 var _handleException = function (requestId, error) {
-	console.error(error);
-	platform.handleException(error);
 	platform.sendResult(requestId, null);
+	platform.handleException(error);
 };
 
 /**
