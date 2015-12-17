@@ -52,6 +52,7 @@ describe('MapQuest Forward Geocoding Service', function () {
 	describe('#data', function () {
 		it('should process the address and send back the valid latitude and longitude coordinates', function (done) {
 			this.timeout(4000);
+			var requestId = (new Date()).getTime().toString();
 
 			service.on('message', function (message) {
 				if (message.type === 'result') {
@@ -59,12 +60,14 @@ describe('MapQuest Forward Geocoding Service', function () {
 
 					should.ok(isNumber(data.lat), 'Latitude data invalid.');
 					should.ok(isNumber(data.lng), 'Longitude data invalid.');
+					should.equal(message.requestId, requestId);
 					done();
 				}
 			});
 
 			service.send({
 				type: 'data',
+				requestId: requestId,
 				data: {
 					address: '10 Jupiter St, Bel-Air, Makati, PH 1209'
 				}
