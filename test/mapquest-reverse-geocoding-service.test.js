@@ -51,18 +51,21 @@ describe('MapQuest Reverse Geocoding Service', function () {
 	describe('#data', function () {
 		it('should process the latitude and longitude coordinates and send back a valid address', function (done) {
 			this.timeout(4000);
+			var requestId = (new Date()).getTime().toString();
 
 			service.on('message', function (message) {
 				if (message.type === 'result') {
 					var data = JSON.parse(message.data);
 
 					should.ok(data.address, 'Resulting address invalid.');
+					should.equal(message.requestId, requestId);
 					done();
 				}
 			});
 
 			service.send({
 				type: 'data',
+				requestId: requestId,
 				data: {
 					lat: 14.556978,
 					lng: 121.034352
