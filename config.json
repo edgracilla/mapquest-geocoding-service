@@ -1,7 +1,7 @@
 {
   "apikey": {
 	"label": "MapQuest API Key",
-	"type": "String",
+	"type": "Password",
 	"required": true,
 	"help": "Enter the API Key provided by MapQuest."
   },
