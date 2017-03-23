@@ -1,19 +1,19 @@
 {
-  "apikey": {
-	"label": "MapQuest API Key",
-	"type": "Password",
-	"required": true,
-	"help": "Enter the API Key provided by MapQuest."
-  },
-  "geocoding_type": {
-	"label": "Geocoding Type",
-	"type": "String",
-	"enum": [
-	  "Forward",
-	  "Reverse"
-	],
-	"required": false,
-	"default": "Reverse",
-	"help": "(Optional) The type of geocoding to be done. Default 'Reverse'."
-  }
+	"apikey": {
+		"label": "MapQuest API Key",
+		"type": "Password",
+		"required": true,
+		"help": "Enter the API Key provided by MapQuest."
+	},
+	"geocodingType": {
+		"label": "Geocoding Type",
+		"type": "String",
+		"enum": [
+			"Forward",
+			"Reverse"
+		],
+		"required": false,
+		"default": "Reverse",
+		"help": "(Optional) The type of geocoding to be done. Default 'Reverse'."
+	}
 }
